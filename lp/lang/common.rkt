@@ -172,6 +172,13 @@
                                       #`(module doc scribble/doclang2
                                           (require scribble/manual
                                                    (only-in felt/private/lp program PROGRAM))
+                                          (require (for-label (submod "..")))
+                                          ;; Based on https://groups.google.com/forum/#!topic/racket-users/7OrQFTOGBaw
+                                          (declare-exporting #:use-sources
+                                                             (,(car
+                                                                (resolved-module-path-name
+                                                                 (variable-reference->resolved-module-path
+                                                                  (#%variable-reference))))))
                                           (begin body0 . body)))])
                                 (syntax-case submod ()
                                   [(_ . rest)
