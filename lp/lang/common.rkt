@@ -97,9 +97,7 @@
           (begin (extract-chunks #'stuff)
                  (with-syntax ([(form ...) (apply append (reverse (unbox module-code)))])
                    #`(#%module-begin
-                      #;(tangle body0)
-                      #;form #;...
-                      (module program prog-lang
+                      (module program #,(strip-context #'prog-lang)
                         #,@(strip-context (reconstruct #'here)))
                       (require (submod "." program))
                       (provide (all-from-out (submod "." program)))
@@ -123,7 +121,9 @@
                                 (syntax-case submod ()
                                   [(_ . rest)
                                    (datum->syntax submod (cons #'module* #'rest))])))
-                             '()))))]))]))
+                             '()))))]))]
+    [(m-b body0 . body)
+     ((make-module-begin submod?) #'(m-b () body0 . body))]))
 
 (define-syntax module-begin/plain (make-module-begin #f))
 (define-syntax module-begin/doc (make-module-begin #t))
