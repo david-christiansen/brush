@@ -5,9 +5,13 @@
          module-begin/doc)
 
 (require (for-syntax racket/base syntax/boundmap racket/list
-                     syntax/strip-context))
+                     syntax/strip-context syntax/parse))
 
 (begin-for-syntax
+  (define-syntax-class whitespace-string
+    (pattern
+     s:str #:when (andmap char-whitespace? (string->list (syntax->datum #'s)))))
+  
   (define first-id #f)
   (define main-id #f)
   (define (mapping-get mapping id)
@@ -56,6 +60,12 @@
           block)))))                               
   (with-syntax ([(body ...) (strip-comments (restore orig-stx (apply append (reverse (unbox module-code)))))])
     #`(begin body ...)))
+
+
+(define-for-syntax (reconstruct orig-stx)
+  (define (restore nstx d) (datum->syntax orig-stx d nstx nstx))
+  (define (shift nstx) (replace-context orig-stx nstx))
+  (strip-comments (restore orig-stx (apply append (reverse (unbox module-code))))))
 
 (define-syntax (tangle stx)
   (define chunk-mentions '())
@@ -150,8 +160,16 @@
           (loop #'exprs)])])))
 
 (define-for-syntax ((make-module-begin submod?) stx)
-  (syntax-case stx ()
-    [(_ body0 . body)
+  (syntax-parse stx
+    [(_ spaces:whitespace-string ...
+        ((~alt (~optional (~seq #:program-lang prog-lang)
+                          #:name "program language"
+                          #:defaults ([prog-lang #'racket]))
+               (~optional (~seq #:doc-lang doc-lang)
+                          #:name "documentation language"
+                          #:defaults ([doc-lang #'scribble/doclang2])))
+         ...)
+        body0 . body)
      (let ([expanded 
             (expand `(,#'module scribble-lp-tmp-name felt/private/lp
                                 ,@(strip-context #'(body0 . body))))])
@@ -162,7 +180,10 @@
                    #`(#%module-begin
                       #;(tangle body0)
                       #;form #;...
-                      (reconstitute body0)
+                      (module program prog-lang
+                        #,@(strip-context (reconstruct #'here)))
+                      (require (submod "." program))
+                      (provide (all-from-out (submod "." program)))
                       ;; The `doc` submodule allows a `scribble/lp` module
                       ;; to be provided to `scribble`:
                       #,@(if submod?
