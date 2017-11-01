@@ -1,9 +1,9 @@
 #lang racket/base
-(require felt/private/lp)
+(require "private/lp.rkt")
 (provide program PROGRAM)
 
 (module reader syntax/module-reader
-  felt/lp/lang/lang2
+  brush/lp/lang/lang2
 
   #:read read-inside
   #:read-syntax read-syntax-inside

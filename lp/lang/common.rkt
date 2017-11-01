@@ -90,7 +90,7 @@
          ...)
         body0 . body)
      (let ([expanded 
-            (expand `(,#'module scribble-lp-tmp-name felt/private/lp
+            (expand `(,#'module scribble-lp-tmp-name brush/private/lp
                                 ,@(strip-context #'(body0 . body))))])
        (syntax-case expanded ()
          [(module name lang (mb . stuff))
@@ -109,7 +109,7 @@
                                      (strip-context
                                       #`(module doc scribble/doclang2
                                           (require scribble/manual
-                                                   (only-in felt/private/lp program PROGRAM))
+                                                   (only-in brush/private/lp program PROGRAM))
                                           (require (for-label (submod "..")))
                                           ;; Based on https://groups.google.com/forum/#!topic/racket-users/7OrQFTOGBaw
                                           (declare-exporting #:use-sources
