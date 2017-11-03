@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 
 (require (for-syntax racket/base syntax/parse)
-         scribble/scheme scribble/manual scribble/struct)
+         scribble/racket scribble/manual scribble/struct)
 
 (begin-for-syntax
   (define-splicing-syntax-class hide-opt
@@ -52,6 +52,6 @@
        #'(elemref '(chunk tag) #:underline? #f str))]))
 
 
-(provide (all-from-out scheme/base
+(provide (all-from-out racket/base
                        scribble/manual)
          program PROGRAM)
